@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-function Dosens({ api }) {
-  const [dosens, setDosens] = useState([]);
+function Dosens({ dosens }) {
   const [pdosens, setPdosens] = useState([]);
   const [paginations, setPaginations] = useState([]);
   const [search, setSearch] = useState([]);
@@ -9,23 +8,15 @@ function Dosens({ api }) {
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    apiHandler();
-    printDosens(0, 10);
-  }, []);
-  useEffect(() => {
     printDosens(0, 10, dosens);
     defaultPage(dosens.length);
+    // if (dosens.length > 0) {
+    //   document.querySelector("body").style.overflowY = "auto";
+    // }
   }, [dosens]);
-
-  const apiHandler = async () => {
-    const request = await fetch(`${api}/dosen`);
-    const response = await request.json();
-    setDosens(response);
-  };
 
   const printDosens = (start, end, x = []) => {
     const element = [];
-
     for (let index = start; index < end; index++) {
       element.push(x[index]);
     }
@@ -72,7 +63,7 @@ function Dosens({ api }) {
       let endValue = 10;
       const arr = [];
       for (let index = 0; index < dataset; index++) {
-        if (index + 1 == dataset) {
+        if (index + 1 === dataset) {
           arr.push({
             id: index,
             start: startValue,
@@ -94,7 +85,6 @@ function Dosens({ api }) {
           endValue += 10;
         }
       }
-      // arr[0] = { ...arr[0], current: true, dataset };
       setPaginations(arr);
     }
   };
@@ -122,74 +112,101 @@ function Dosens({ api }) {
     }
   };
   return (
-    <section id="list-dosens">
-      <h1 className="my-3">List dosens</h1>
-      <div className="row mb-2">
-        <div className="col-6">
-          <input
-            className="form-control shadow"
-            onChange={(e) => searchHandler(e.target.value, searchBy)}
-            type="text"
-            value={inputValue}
-          />
+    <>
+      <section id="list-dosens">
+        <h1 className="my-3 display-5">List dosens</h1>
+        <div className="row mb-2">
+          <div className="col-6">
+            <input
+              className="form-control shadow"
+              onChange={(e) => searchHandler(e.target.value, searchBy)}
+              type="text"
+              value={inputValue}
+            />
+          </div>
+          <div className="col-3">
+            <select
+              className="form-select shadow"
+              onChange={(e) => setSearchBy(e.target.value)}
+            >
+              <option value="">Search By</option>
+              <option value="nama">Nama dosen andalangmu</option>
+              <option value="fakultas">Fakultas</option>
+            </select>
+          </div>
         </div>
-        <div className="col-3">
-          <select
-            className="form-select shadow"
-            onChange={(e) => setSearchBy(e.target.value)}
-          >
-            <option value="">Search By</option>
-            <option value="nama">Nama dosen andalangmu</option>
-            <option value="fakultas">Fakultas</option>
-          </select>
-        </div>
-      </div>
-      <div className="card card-body shadow table-responsive" id="table-dosens">
-        <table className="table table-hover">
-          <thead>
-            <tr>
-              <th>No.</th>
-              <th>nbm</th>
-              <th>Nama</th>
-              <th>Fakultas</th>
-              <th>Jenis Kelamin</th>
-              <th>No. telepon</th>
-              <th>Alamat</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pdosens[0] !== undefined ? (
-              pdosens.map((dosen, index) => {
-                return (
-                  <tr key={dosen.id}>
-                    <td>{++index}</td>
-                    <td>{dosen.nbm ? dosen.nbm : "####"}</td>
-                    <td>{dosen.nama}</td>
-                    <td>{dosen.fakultas}</td>
-                    <td>{dosen.jenis_kelamin}</td>
-                    <td>{dosen.no_telpon ? dosen.no_telpon : "#######"}</td>
-                    <td>{dosen.alamat ? dosen.alamat : "#######"}</td>
-                  </tr>
-                );
-              })
-            ) : (
+        <div
+          className="card card-body shadow table-responsive"
+          id="table-dosens"
+        >
+          <table className="table table-hover">
+            <thead>
               <tr>
-                <td colSpan={4}>Loading data....</td>
+                <th>No.</th>
+                <th>nbm</th>
+                <th>Nama</th>
+                <th>Fakultas</th>
+                <th>Jenis Kelamin</th>
+                <th>No. telepon</th>
+                <th>Alamat</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-        <nav aria-label="Page navigation example">
-          <ul className="pagination">
-            {paginations
-              .filter((pagePrev) => pagePrev.prev)
-              .map((prev) => {
+            </thead>
+            <tbody>
+              {pdosens[0] !== undefined ? (
+                pdosens.map((dosen, index) => {
+                  return (
+                    <tr key={dosen.id}>
+                      <td>{++index}</td>
+                      <td>{dosen.nbm ? dosen.nbm : "####"}</td>
+                      <td>{dosen.nama}</td>
+                      <td>{dosen.fakultas}</td>
+                      <td>{dosen.jenis_kelamin}</td>
+                      <td>{dosen.no_telpon ? dosen.no_telpon : "#######"}</td>
+                      <td>{dosen.alamat ? dosen.alamat : "#######"}</td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={4}>Loading data....</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <nav aria-label="Page navigation example">
+            <ul className="pagination">
+              {paginations
+                .filter((pagePrev) => pagePrev.prev)
+                .map((prev) => {
+                  return (
+                    <li
+                      className="page-item"
+                      key={prev.id}
+                      style={
+                        prev.current
+                          ? { cursor: "default" }
+                          : { cursor: "pointer" }
+                      }
+                    >
+                      <a
+                        className="page-link"
+                        href="#table-dosens"
+                        onClick={() =>
+                          pageHandler(prev, search.length > 0 ? search : dosens)
+                        }
+                      >
+                        Prev
+                      </a>
+                    </li>
+                  );
+                })}
+              {paginations.map((page) => {
                 return (
                   <li
-                    className="page-item"
-                    key={prev.id}
+                    className={page.current ? "page-item active" : "page-item"}
+                    key={page.id}
                     style={
-                      prev.current
+                      page.current
                         ? { cursor: "default" }
                         : { cursor: "pointer" }
                     }
@@ -198,65 +215,45 @@ function Dosens({ api }) {
                       className="page-link"
                       href="#table-dosens"
                       onClick={() =>
-                        pageHandler(prev, search.length > 0 ? search : dosens)
+                        pageHandler(page, search.length > 0 ? search : dosens)
                       }
                     >
-                      Prev
+                      {page.id + 1}
                     </a>
                   </li>
                 );
               })}
-            {paginations.map((page) => {
-              return (
-                <li
-                  className={page.current ? "page-item active" : "page-item"}
-                  key={page.id}
-                  style={
-                    page.current ? { cursor: "default" } : { cursor: "pointer" }
-                  }
-                >
-                  <a
-                    className="page-link"
-                    href="#table-dosens"
-                    onClick={() =>
-                      pageHandler(page, search.length > 0 ? search : dosens)
-                    }
-                  >
-                    {page.id + 1}
-                  </a>
-                </li>
-              );
-            })}
 
-            {paginations
-              .filter((pageNext) => pageNext.next)
-              .map((next) => {
-                return (
-                  <li
-                    className="page-item"
-                    key={next.id}
-                    style={
-                      next.current
-                        ? { cursor: "default" }
-                        : { cursor: "pointer" }
-                    }
-                  >
-                    <a
-                      className="page-link"
-                      href="#table-dosens"
-                      onClick={() =>
-                        pageHandler(next, search.length > 0 ? search : dosens)
+              {paginations
+                .filter((pageNext) => pageNext.next)
+                .map((next) => {
+                  return (
+                    <li
+                      className="page-item"
+                      key={next.id}
+                      style={
+                        next.current
+                          ? { cursor: "default" }
+                          : { cursor: "pointer" }
                       }
                     >
-                      Next
-                    </a>
-                  </li>
-                );
-              })}
-          </ul>
-        </nav>
-      </div>
-    </section>
+                      <a
+                        className="page-link"
+                        href="#table-dosens"
+                        onClick={() =>
+                          pageHandler(next, search.length > 0 ? search : dosens)
+                        }
+                      >
+                        Next
+                      </a>
+                    </li>
+                  );
+                })}
+            </ul>
+          </nav>
+        </div>
+      </section>
+    </>
   );
 }
 
